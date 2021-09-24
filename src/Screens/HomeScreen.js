@@ -10,18 +10,20 @@ import {
 } from "react-native";
 import PropTypes from "prop-types";
 import { useNavigation } from "@react-navigation/native";
+import { useDispatch, useSelector } from "react-redux";
+import { toggleDetails } from "../Actions/Actions";
 
 const GET_EVENTS = "https://api.github.com/events";
 
 let interval = 0;
 
 const initInterval = (getUsersFromApi) => {
-  // getUsersFromApi();
+  getUsersFromApi();
   interval = setInterval(() => getUsersFromApi(), 6 * 1000);
   console.log("I was emitted");
 };
 
-const UsersList = ({ users, getUsersFromApi }) => {
+const UsersList = ({ change, users, getUsersFromApi }) => {
   const [refreshing, setRefreshing] = React.useState(false);
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
@@ -34,6 +36,7 @@ const UsersList = ({ users, getUsersFromApi }) => {
       data={users}
       renderItem={({ item }) => (
         <UserItem
+          change={change}
           avatarUrl={item.actor.avatar_url}
           displayLogin={item.actor.display_login}
           url={item.actor.url}
@@ -51,11 +54,12 @@ const UsersList = ({ users, getUsersFromApi }) => {
   );
 };
 
-const UserItem = ({ url, avatarUrl, displayLogin }) => {
+const UserItem = ({ change, url, avatarUrl, displayLogin }) => {
   const navigation = useNavigation();
   const onPressItem = () => {
     clearInterval(interval);
     navigation.navigate("Details", { url });
+    change(true);
   };
   return (
     <Pressable
@@ -73,6 +77,11 @@ const UserItem = ({ url, avatarUrl, displayLogin }) => {
 };
 
 export const HomeScreen = () => {
+  const isOpened = useSelector((state) => state.main.isDetailsOpened);
+  const dispatch = useDispatch();
+
+  const change = (isOpened) => dispatch(toggleDetails(isOpened));
+
   const [users, setUsers] = React.useState([]);
 
   const getUsersFromApi = async () => {
@@ -93,9 +102,19 @@ export const HomeScreen = () => {
     };
   }, []);
 
+  useEffect(() => {
+    if (isOpened) {
+      initInterval(getUsersFromApi);
+    }
+  }, [isOpened]);
+
   return (
     <View>
-      <UsersList getUsersFromApi={getUsersFromApi} users={users} />
+      <UsersList
+        change={change}
+        getUsersFromApi={getUsersFromApi}
+        users={users}
+      />
     </View>
   );
 };
@@ -123,9 +142,11 @@ const styles = StyleSheet.create({
 UsersList.propTypes = {
   users: PropTypes.array,
   getUsersFromApi: PropTypes.func,
+  change: PropTypes.func,
 };
 UserItem.propTypes = {
   avatarUrl: PropTypes.string,
   displayLogin: PropTypes.string,
   url: PropTypes.string,
+  change: PropTypes.func,
 };
