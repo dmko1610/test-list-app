@@ -19,8 +19,7 @@ let interval = 0;
 
 const initInterval = (getUsersFromApi) => {
   getUsersFromApi();
-  interval = setInterval(() => getUsersFromApi(), 6 * 1000);
-  console.log("I was emitted");
+  interval = setInterval(() => getUsersFromApi(), 60 * 1000);
 };
 
 const UsersList = ({ change, users, getUsersFromApi }) => {
@@ -47,7 +46,6 @@ const UsersList = ({ change, users, getUsersFromApi }) => {
       }
       onScrollBeginDrag={() => {
         clearInterval(interval);
-        console.log("after crol ", interval);
       }}
       onScrollEndDrag={() => initInterval(getUsersFromApi)}
     />
@@ -85,7 +83,6 @@ export const HomeScreen = () => {
   const [users, setUsers] = React.useState([]);
 
   const getUsersFromApi = async () => {
-    console.log("executed ", interval);
     try {
       const response = await fetch(GET_EVENTS);
       const json = await response.json();
