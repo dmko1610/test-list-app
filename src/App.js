@@ -26,3 +26,12 @@ export default function App() {
     </Provider>
   );
 }
+
+
+/* 
+1) Подключен redux но для запросов используется обычный фетч, и данные сразу же используются на экране, смысл подключения redux потеряна так же не подключен middleWare (thunk, saga)
+4) renderItem, keyExtractor нужно выносить в useCallback из  FlatList
+5) keyExtractor отсутствует, нет гарантий что всегда будет приходить ключ key или id с бэка в формате   string лучше это дело контролировать через keyExtractor и менять в случае чего а не искать ошибку
+6) Нет оптимизации memo...
+7) Нет колбеков useCallback 
+*/
